@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from app import db
+from flask_login import login_user, logout_user, login_required
 from app.models import User
-from app.auth.forms import RegistrationForm, SetPasswordForm
-from app.emails import send_verification_email
+from app.auth.forms import RegistrationForm, SetPasswordForm, LoginForm
 from app.auth.token import generate_token, verify_token
+from app.emails.auth_emails import send_verification_email
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -80,3 +81,30 @@ def set_password(token):
         return redirect(url_for("auth.login"))
     
     return render_template("auth/set_password.html", form=form, token=token)
+
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = db.session.query(User).filter_by(email=form.email.data).first()
+        if user is None or not user.has_password_set:
+             flash("Invalid email or password.", "error")
+             return redirect(url_for('auth.login'))
+        
+        if not user.check_password(form.password.data):
+             flash("Invalid email or password.", "error")
+             return redirect(url_for('auth.login'))
+        
+        login_user(user)
+        return redirect(url_for('dashboard.index'))
+    
+    return render_template('auth/login.html', form=form)
+
+
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out.", "info")
+    return redirect(url_for('auth.login'))

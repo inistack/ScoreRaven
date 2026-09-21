@@ -20,6 +20,12 @@ def create_app(config_class=Config):
     
     with app.app_context():
         from app import models
+    
+    from app.auth.routes import auth_bp
+    from app.dashboard.routes import dashboard_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(dashboard_bp)
 
     return app
 
