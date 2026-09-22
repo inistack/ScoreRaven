@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Add Question — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Add Question to "{{ test.title }}"</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+        {{ form.type.label(class="form-label") }}
+        {{ form.type(class="form-select") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.prompt.label(class="form-label") }}
+        {{ form.prompt(class="form-control", rows=3) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.points.label(class="form-label") }}
+        {{ form.points(class="form-control", style="max-width: 120px;") }}
+    </div>
+
+    <div id="options-wrapper">
+        <label class="form-label">Options</label>
+        {% for option_form in form.options %}
+            <div class="input-group mb-2">
+                {{ option_form.text(class="form-control", placeholder="Option text") }}
+                <div class="input-group-text">
+                    {{ option_form.is_correct }} <span class="ms-1">Correct</span>
+                </div>
+            </div>
+        {% endfor %}
+        <p class="text-muted small">Leave unused option fields blank.</p>
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+
+<a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="d-block mt-3">
+    Back to test
+</a>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if test else "New" }} Test — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">{{ "Edit" if test else "New" }} Test</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.subject_name.label(class="form-label") }}
+        {{ form.subject_name(class="form-control", list="subject-list") }}
+        <datalist id="subject-list">
+            {% for s in subjects %}
+                <option value="{{ s.name }}">
+            {% endfor %}
+        </datalist>
+    </div>
+
+    <div class="mb-3">
+        {{ form.difficulty.label(class="form-label") }}
+        {{ form.difficulty(class="form-select", id="difficulty-select") }}
+    </div>
+
+    <div class="mb-3" id="show-answers-wrapper">
+        <div class="form-check">
+            {{ form.show_correct_answers(class="form-check-input") }}
+            {{ form.show_correct_answers.label(class="form-check-label") }}
+        </div>
+    </div>
+
+    <div class="mb-3">
+        {{ form.release_mode.label(class="form-label") }}
+        {{ form.release_mode(class="form-select") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.time_limit_minutes.label(class="form-label") }}
+        {{ form.time_limit_minutes(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.validity_hours.label(class="form-label") }}
+        {{ form.validity_hours(class="form-control") }}
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+
+<script>
+    const difficultySelect = document.getElementById("difficulty-select");
+    const showAnswersWrapper = document.getElementById("show-answers-wrapper");
+
+    function toggleShowAnswers() {
+        showAnswersWrapper.style.display = difficultySelect.value === "basic" ? "block" : "none";
+    }
+
+    difficultySelect.addEventListener("change", toggleShowAnswers);
+    toggleShowAnswers();
+</script>
+
+{% if test %}
+    <hr class="my-4">
+    <h4>Questions</h4>
+    {% if test.questions %}
+        <ul class="list-group mb-3">
+            {% for q in test.questions %}
+                <li class="list-group-item">
+                    {{ q.prompt[:80] }}{{ "..." if q.prompt|length > 80 else "" }}
+                    <span class="badge bg-secondary">{{ q.type }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No questions yet.</p>
+    {% endif %}
+    <a href="{{ url_for('admin.new_question', test_id=test.id) }}" class="btn btn-outline-primary">
+        Add Question
+    </a>
+{% endif %}
+{% endblock %}

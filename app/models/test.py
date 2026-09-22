@@ -11,6 +11,7 @@ class Test(db.Model):
 
     difficulty = db.Column(db.String(20), nullable=False)
     time_limit_seconds = db.Column(db.Integer, nullable=False)
+    validity_hours = db.Column(db.Integer, nullable=False)
     release_mode = db.Column(db.String(20), nullable=False, default="manual")
 
     show_correct_answers = db.Column(db.Boolean, nullable=False, default=False)
