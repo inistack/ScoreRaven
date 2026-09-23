@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ dispatch.test.title }} — ScoreRaven{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{{ dispatch.test.title }}</h2>
+    <div id="timer" class="badge bg-dark fs-6"></div>
+</div>
+
+<form method="POST" action="{{ url_for('candidate.submit_test', dispatch_id=dispatch.id) }}" id="test-form">
+
+    {% for aq in attempt_questions %}
+        {% set question = aq.question %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="card-text">
+                    <strong>{{ loop.index }}.</strong> {{ question.prompt }}
+                    <span class="badge bg-light text-dark">{{ question.points }} pt(s)</span>
+                </p>
+
+                {% if question.type == "written" %}
+                    <textarea name="question_{{ question.id }}" class="form-control" rows="4"></textarea>
+
+                {% elif question.type == "multi" %}
+                    {% for option in question.options|sort(attribute="display_order") %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="question_{{ question.id }}" value="{{ option.id }}"
+                                   id="opt-{{ option.id }}">
+                            <label class="form-check-label" for="opt-{{ option.id }}">{{ option.text }}</label>
+                        </div>
+                    {% endfor %}
+
+                {% else %}  {# single or truefalse — both are single-select #}
+                    {% for option in question.options|sort(attribute="display_order") %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="question_{{ question.id }}" value="{{ option.id }}"
+                                   id="opt-{{ option.id }}">
+                            <label class="form-check-label" for="opt-{{ option.id }}">{{ option.text }}</label>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary" id="submit-btn">Submit Test</button>
+</form>
+
+<script>
+    let remaining = {{ remaining_seconds }};
+    const timerEl = document.getElementById("timer");
+    const form = document.getElementById("test-form");
+
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, "0")}`;
+    }
+
+    function tick() {
+        timerEl.textContent = formatTime(remaining);
+        if (remaining <= 0) {
+            clearInterval(intervalId);
+            form.submit();
+            return;
+        }
+        remaining -= 1;
+    }
+
+    tick();
+    const intervalId = setInterval(tick, 1000);
+</script>
+{% endblock %}

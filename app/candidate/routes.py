@@ -1,8 +1,10 @@
-from datetime import datetime, timezone
-from flask import Blueprint, render_template, request
+from datetime import datetime, timedelta, timezone
+from flask import Blueprint, abort, render_template, request, redirect, url_for, flash
 from flask_login import current_user
 from app.auth.decorators import roles_required
-from app.models import Dispatch
+from app.models import Dispatch, AttemptQuestion
+from app.services.attempt_service import start_or_resume_attempt, DispatchExpiredError, AttemptNotResumableError
+from app.services.scoring_service import submit_attempt
 
 candidate_bp = Blueprint('candidate', __name__, url_prefix='/candidate')
 
@@ -46,3 +48,59 @@ def my_tests():
     )
 
 
+@candidate_bp.route("/tests/<int:dispatch_id>/take")
+@roles_required('candidate')
+def take_test(dispatch_id):
+    dispatch = Dispatch.query.get_or_404(dispatch_id)
+
+    if dispatch.candidate_id != current_user.id:
+        abort(403)
+    
+    try:
+        attempt = start_or_resume_attempt(dispatch)
+    except DispatchExpiredError:
+        flash(str(e), "error")
+        return redirect(url_for("candidate.my_tests"))
+    except AttemptNotResumableError:
+        flash(str(e), "error")
+        return redirect(url_for("candidate.my_tests"))
+    
+    remaining_seconds = (
+        attempt.started_at.replace(tzinfo=timezone.utc)
+        + timedelta(seconds=dispatch.test.time_limit_seconds)
+        - datetime.now(timezone.utc)
+    ).total_seconds()
+
+    attempt_questions = (
+        AttemptQuestion.query
+        .filter_by(attempt_id=attempt.id)
+        .order_by(AttemptQuestion.display_order)
+        .all()
+    )
+
+    return render_template(
+        'candidate/take_test.html',
+        dispatch=dispatch,
+        attempt=attempt,
+        attempt_questions=attempt_questions,
+        remaining_seconds=max(0, int(remaining_seconds)),
+    )
+
+
+@candidate_bp.route('/tests/<int:dispatch_id>/submit', methods=['POST'])
+@roles_required('candidate')
+def submit_test(dispatch_id):
+    dispatch = Dispatch.query.get_or_404(dispatch_id)
+
+    if dispatch.candidate_id != current_user.id:
+        abort(403)
+
+    attempt = dispatch.attempt
+    if attempt is None or attempt.status != "in_progress":
+        flash("This test is not available for submission.", "error")
+        return redirect(url_for("candidate.my_tests"))
+
+    submit_attempt(attempt, request.form)
+
+    flash("Test submitted.", "success")
+    return redirect(url_for("candidate.my_tests"))
