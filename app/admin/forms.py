@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, BooleanField, SubmitField, IntegerField, TextAreaField, FormField, FieldList
 from wtforms.validators import DataRequired, Length, NumberRange
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+
 
 class TestForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=255)])
@@ -46,3 +48,16 @@ class QuestionForm(FlaskForm):
     options = FieldList(FormField(OptionForm), min_entries=4, max_entries=8)
 
     submit = SubmitField("Save Question")
+
+
+class DispatchForm(FlaskForm):
+    csv_file = FileField(
+        'Candidate list (CSV)',
+        validators=[
+            FileRequired(),
+            FileAllowed(['csv'], 'CSV files only!')
+        ]
+    )
+    submit = SubmitField('Dispatch Test')
+
+

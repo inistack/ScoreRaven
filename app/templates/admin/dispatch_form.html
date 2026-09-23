@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Dispatch — {{ test.title }} — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-2">Dispatch Test</h2>
+<p class="text-muted">{{ test.title }} · {{ test.difficulty }} · {{ test.questions|length }} question(s)</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+        {{ form.csv_file.label(class="form-label") }}
+        {{ form.csv_file(class="form-control") }}
+        <div class="form-text">
+            A CSV with an "email" column, or a plain list of emails with no header — one per row.
+        </div>
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+
+<div class="alert alert-warning mt-4">
+    Dispatching will lock this test from further edits — do this only when the test is finalized.
+</div>
+
+<a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="d-block mt-3">
+    Back to test
+</a>
+{% endblock %}

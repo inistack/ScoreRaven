@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }} — Locked — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-2">{{ test.title }}</h2>
+<p class="text-muted">{{ test.difficulty }} · {{ test.questions|length }} question(s)</p>
+
+<div class="alert alert-secondary">
+    This test has been dispatched and can no longer be edited.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-4">Subject</dt>
+    <dd class="col-sm-8">{{ test.subject.name }}</dd>
+
+    <dt class="col-sm-4">Release mode</dt>
+    <dd class="col-sm-8">{{ test.release_mode }}</dd>
+
+    <dt class="col-sm-4">Time limit</dt>
+    <dd class="col-sm-8">{{ test.time_limit_seconds // 60 }} minutes</dd>
+
+    <dt class="col-sm-4">Validity window</dt>
+    <dd class="col-sm-8">{{ test.validity_hours }} hours</dd>
+
+    <dt class="col-sm-4">Dispatched</dt>
+    <dd class="col-sm-8">{{ test.dispatches|length }} candidate(s)</dd>
+</dl>
+
+<h4 class="mt-4">Questions</h4>
+<ul class="list-group mb-3">
+    {% for q in test.questions %}
+        <li class="list-group-item">
+            {{ q.prompt[:80] }}{{ "..." if q.prompt|length > 80 else "" }}
+            <span class="badge bg-secondary">{{ q.type }}</span>
+            <span class="badge bg-light text-dark">{{ q.points }} pt(s)</span>
+        </li>
+    {% endfor %}
+</ul>
+
+<a href="{{ url_for('admin.dashboard') }}" class="d-block mt-3">Back to dashboard</a>
+{% endblock %}

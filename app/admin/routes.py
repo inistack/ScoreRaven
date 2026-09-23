@@ -2,10 +2,13 @@ from app import db
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from app.models import Test, Subject, Question, Option
 from app.auth.decorators import roles_required
-from app.admin.forms import TestForm, QuestionForm
+from app.admin.forms import TestForm, QuestionForm, DispatchForm
 from flask_login import current_user
 from app.services.question_validation import validate_question_options, QuestionValidationError
 from app.services.subject_service import get_or_create_subject
+from app.services.dispatch_service import dispatch_test_to_emails
+from app.services.csv_parsing import extract_emails_from_csv, CSVParseError
+from app.services.test_lock import ensure_test_unlocked
 
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -43,7 +46,7 @@ def edit_test(test_id):
 
     if test.is_locked:
         flash("This test has been dispatched and can no longer be edited.", "error")
-        return render_template('admin/test_locked.html', test=test)
+        return render_template("admin/test_locked.html", test=test)
     
     form = TestForm(obj=test)
     if request.method == "GET":
@@ -73,9 +76,9 @@ def edit_test(test_id):
 def new_question(test_id):
     test = Test.query.get_or_404(test_id)
 
-    if test.is_locked:
-        flash("This test has been dispatched and can no longer be edited.", "error")
-        return redirect(url_for("admin.edit_test", test_id=test.id))
+    locked_response = ensure_test_unlocked(test)
+    if locked_response:
+        return locked_response
     
     form = QuestionForm()
 
@@ -116,4 +119,43 @@ def new_question(test_id):
     
     return render_template("admin/question_form.html", form=form, test=test)
 
+
+@admin_bp.route('/tests/<int:test_id>/dispatch', methods=['GET', 'POST'])
+@roles_required('admin')
+def dispatch_test(test_id):
+    test = Test.query.get_or_404(test_id)
+
+    locked_response = ensure_test_unlocked(test)
+    if locked_response:
+        return locked_response
+
+    if not test.questions:
+        flash("Add at least one question before dispatching this test.", "error")
+        return redirect(url_for("admin.edit_test", test_id=test.id))
+    
+    form = DispatchForm()
+
+    if form.validate_on_submit():
+        try:
+            emails = extract_emails_from_csv(form.csv_file.data)
+        except CSVParseError as e:
+            flash(str(e), "error")
+            return render_template("admin/dispatch_form.html", form=form, test=test)
+        
+        results = dispatch_test_to_emails(test, emails)
+        test.published_at = test.published_at or db.func.now()
+        test.is_locked = True
+        db.session.commit()
+
+        flash(
+            f"Dispatched to {len(results['dispatched'])} candidate(s). "
+            f"{len(results['skipped'])} skipped.",
+            "success",
+        )
+
+        return redirect(url_for("admin.edit_test", test_id=test.id))
+    
+    return render_template("admin/dispatch_form.html", form=form, test=test)
+
+        
     
