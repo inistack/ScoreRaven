@@ -1,6 +1,6 @@
 from app import db
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from app.models import Test, Subject, Question, Option
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from app.models import Test, Dispatch, Question, Option
 from app.auth.decorators import roles_required
 from app.admin.forms import TestForm, QuestionForm, DispatchForm
 from flask_login import current_user
@@ -9,6 +9,8 @@ from app.services.subject_service import get_or_create_subject
 from app.services.dispatch_service import dispatch_test_to_emails
 from app.services.csv_parsing import extract_emails_from_csv, CSVParseError
 from app.services.test_lock import ensure_test_unlocked
+from app.services.results_service import release_results, release_results_for_test
+
 
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -158,4 +160,26 @@ def dispatch_test(test_id):
     return render_template("admin/dispatch_form.html", form=form, test=test)
 
         
-    
+@admin_bp.route("/tests/<int:test_id>/dispatches/<int:dispatch_id>/release", methods=["POST"])
+@roles_required("admin")
+def release_dispatch_results(test_id, dispatch_id):
+    dispatch = Dispatch.query.get_or_404(dispatch_id)
+    if dispatch.test_id != test_id:
+        abort(404)
+
+    try:
+        release_results(dispatch)
+        flash("Results released to candidate.", "success")
+    except ValueError as e:
+        flash(str(e), "error")
+
+    return redirect(url_for("admin.edit_test", test_id=test_id))
+
+
+@admin_bp.route("/tests/<int:test_id>/release-all", methods=["POST"])
+@roles_required("admin")
+def release_all_results(test_id):
+    test = Test.query.get_or_404(test_id)
+    count = release_results_for_test(test)
+    flash(f"Released results to {count} candidate(s).", "success")
+    return redirect(url_for("admin.edit_test", test_id=test_id))

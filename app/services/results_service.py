@@ -16,3 +16,14 @@ def release_results(dispatch):
 
     dispatch.results_released_at = datetime.now(timezone.utc)
     db.session.commit()
+
+def release_results_for_test(test):
+    released_count = 0
+    for dispatch in test.dispatches:
+        attempt = dispatch.attempt
+        if attempt and attempt.status in ("graded", "completed") and not dispatch.results_released_at:
+            dispatch.results_released_at = datetime.now(timezone.utc)
+            released_count += 1
+
+    db.session.commit()
+    return released_count
