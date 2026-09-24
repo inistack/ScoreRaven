@@ -79,8 +79,18 @@
     {% else %}
         <p class="text-muted">No questions yet.</p>
     {% endif %}
+    <div class="d-flex gap-2 mt-3">
     <a href="{{ url_for('admin.new_question', test_id=test.id) }}" class="btn btn-outline-primary">
         Add Question
     </a>
+    {% if test.questions %}
+        <a href="{{ url_for('admin.dispatch_test', test_id=test.id) }}" class="btn btn-success">
+            Dispatch Test
+        </a>
+    {% endif %}
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
+</div>
 {% endif %}
 {% endblock %}

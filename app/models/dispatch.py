@@ -11,6 +11,7 @@ class Dispatch(db.Model):
     candidate = db.relationship('User', backref='dispatches_received')
     invited_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     expires_at = db.Column(db.DateTime, nullable=False)
+    results_released_at = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(20), nullable=False, default='invited')
 
     __table_args__ = (

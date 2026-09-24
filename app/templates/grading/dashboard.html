@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Welcome, {{ current_user.name or current_user.email }}</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-6">
+        <div class="card text-center"><div class="card-body">
+            <h3>{{ pending_count }}</h3><small class="text-muted">Awaiting Grading</small>
+        </div></div>
+    </div>
+    <div class="col-6">
+        <div class="card text-center"><div class="card-body">
+            <h3>{{ my_claims_count }}</h3><small class="text-muted">Your Claims</small>
+        </div></div>
+    </div>
+</div>
+
+<a href="{{ url_for('grading.queue') }}" class="btn btn-primary">Go to Grading Queue</a>
+<a href="{{ url_for('auth.logout') }}" class="d-block mt-3">Log out</a>
+{% endblock %}

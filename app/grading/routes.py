@@ -9,6 +9,17 @@ from app.services.grading_service import apply_grades
 
 grading_bp = Blueprint("grading", __name__, url_prefix="/grading")
 
+@grading_bp.route("/")
+@roles_required("admin", "grader")
+def index():
+    pending_count = Attempt.query.filter_by(status="pending_grading").count()
+    my_claims_count = Attempt.query.filter_by(
+        status="pending_grading", claimed_by=current_user.id
+    ).count()
+    return render_template(
+        "grading/dashboard.html", pending_count=pending_count, my_claims_count=my_claims_count
+    )
+
 @grading_bp.route("/queue")
 @roles_required('admin', 'grader')
 def queue():

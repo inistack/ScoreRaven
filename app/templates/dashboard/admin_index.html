@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Welcome, {{ current_user.name or current_user.email }}</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-4">
+        <div class="card text-center"><div class="card-body">
+            <h3>{{ test_count }}</h3><small class="text-muted">Tests</small>
+        </div></div>
+    </div>
+    <div class="col-4">
+        <div class="card text-center"><div class="card-body">
+            <h3>{{ active_dispatches }}</h3><small class="text-muted">Active Dispatches</small>
+        </div></div>
+    </div>
+    <div class="col-4">
+        <div class="card text-center"><div class="card-body">
+            <h3>{{ pending_grading_count }}</h3><small class="text-muted">Pending Grading</small>
+        </div></div>
+    </div>
+</div>
+
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ url_for('admin.new_test') }}" class="btn btn-primary">New Test</a>
+    <a href="{{ url_for('grading.queue') }}" class="btn btn-outline-secondary">Grading Queue</a>
+</div>
+
+<h5>Recent Tests</h5>
+<ul class="list-group mb-3">
+    {% for t in recent_tests %}
+        <li class="list-group-item d-flex justify-content-between">
+            <a href="{{ url_for('admin.edit_test', test_id=t.id) }}">{{ t.title }}</a>
+            <span class="badge {{ 'bg-secondary' if t.is_locked else 'bg-success' }}">
+                {{ "Locked" if t.is_locked else "Draft" }}
+            </span>
+        </li>
+    {% else %}
+        <li class="list-group-item text-muted">No tests yet.</li>
+    {% endfor %}
+</ul>
+
+<a href="{{ url_for('auth.logout') }}">Log out</a>
+{% endblock %}

@@ -52,8 +52,13 @@
 {% if done_pagination.items %}
     <ul class="list-group mb-3">
         {% for d in done_pagination.items %}
-            <li class="list-group-item">
-                {{ d.test.title }} — {{ d.invited_at.strftime("%b %d, %Y") }}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ d.test.title }} — {{ d.invited_at.strftime("%b %d, %Y") }}</span>
+                {% if is_result_released(d) %}
+                    <a href="{{ url_for('candidate.view_results', dispatch_id=d.id) }}" class="btn btn-sm btn-outline-primary">
+                        View Results
+                    </a>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
@@ -78,4 +83,6 @@
 {% else %}
     <p class="text-muted">No completed tests yet.</p>
 {% endif %}
+
+<a href="{{ url_for('dashboard.index') }}" class="d-block mt-4">Back to Dashboard</a>
 {% endblock %}

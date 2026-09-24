@@ -6,6 +6,8 @@ from app.models import Dispatch, AttemptQuestion, Question
 from app.services.attempt_service import start_or_resume_attempt, DispatchExpiredError, AttemptNotResumableError
 from app.services.scoring_service import submit_attempt
 from app.services.attempt_service import save_answer
+from app.services.time_utils import as_utc
+from app.services.results_service import is_result_released
 
 candidate_bp = Blueprint('candidate', __name__, url_prefix='/candidate')
 
@@ -30,7 +32,7 @@ def my_tests():
         
         if dispatch.attempt and dispatch.status == 'in_progress':
             in_progress.append(dispatch)
-        elif dispatch.status == 'expired_no_attempt' and dispatch.status == "invited" and dispatch.expires_at < now:
+        elif dispatch.status == 'expired_no_attempt' and dispatch.status == "invited" and as_utc(dispatch.expires_at) < now:
             expired.append(dispatch)
         else:
             available.append(dispatch)
@@ -45,7 +47,7 @@ def my_tests():
     
     return render_template(
         'candidate/my_tests.html', 
-        available=available, expired=expired, in_progress=in_progress, done_pagination=done_pagination,
+        available=available, expired=expired, in_progress=in_progress, done_pagination=done_pagination, is_result_released=is_result_released,
     )
 
 
@@ -59,15 +61,15 @@ def take_test(dispatch_id):
     
     try:
         attempt = start_or_resume_attempt(dispatch)
-    except DispatchExpiredError:
+    except DispatchExpiredError as e:
         flash(str(e), "error")
         return redirect(url_for("candidate.my_tests"))
-    except AttemptNotResumableError:
+    except AttemptNotResumableError as e:
         flash(str(e), "error")
         return redirect(url_for("candidate.my_tests"))
     
     remaining_seconds = (
-        attempt.started_at.replace(tzinfo=timezone.utc)
+        as_utc(attempt.started_at)
         + timedelta(seconds=dispatch.test.time_limit_seconds)
         - datetime.now(timezone.utc)
     ).total_seconds()
@@ -132,3 +134,23 @@ def autosave(dispatch_id):
     )
     return jsonify({"status": "ok"})
 
+
+@candidate_bp.route("/tests/<int:dispatch_id>/results")
+@roles_required("candidate")
+def view_results(dispatch_id):
+    dispatch = Dispatch.query.get_or_404(dispatch_id)
+    if dispatch.candidate_id != current_user.id:
+        abort(403)
+
+    if not is_result_released(dispatch):
+        flash("Results for this test aren't available yet.", "info")
+        return redirect(url_for("candidate.my_tests"))
+
+    attempt = dispatch.attempt
+    answers = {a.question_id: a for a in attempt.answers}
+    questions = dispatch.test.questions
+
+    return render_template(
+        "candidate/results.html",
+        dispatch=dispatch, attempt=attempt, questions=questions, answers=answers,
+    )

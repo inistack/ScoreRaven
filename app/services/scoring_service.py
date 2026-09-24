@@ -37,7 +37,7 @@ def submit_attempt(attempt, form_data):
     db.session.add(answer)
 
     if has_pending_written:
-        attempt.status = 'pending_review'
+        attempt.status = 'pending_grading'
         attempt.score = None
     else:
         attempt.status = 'completed'

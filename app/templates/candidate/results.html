@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ dispatch.test.title }} — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="mb-2">{{ dispatch.test.title }}</h2>
+<p class="fs-4">Score: {{ attempt.score }}</p>
+
+{% for question in questions %}
+    {% set answer = answers.get(question.id) %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <p class="mb-1">{{ question.prompt }}</p>
+            {% if question.type != "written" %}
+                <span class="badge {{ 'bg-success' if answer.is_correct else 'bg-danger' }}">
+                    {{ "Correct" if answer.is_correct else "Incorrect" }}
+                </span>
+                {% if dispatch.test.show_correct_answers %}
+                    <p class="text-muted small mt-2 mb-0">
+                        Correct answer(s):
+                        {% for o in question.options if o.is_correct %}{{ o.text }}{{ ", " if not loop.last }}{% endfor %}
+                    </p>
+                {% endif %}
+            {% else %}
+                <span class="badge {{ 'bg-success' if answer.is_correct else 'bg-danger' }}">
+                    {{ answer.points_awarded }} / {{ question.points }} pt(s)
+                </span>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<a href="{{ url_for('candidate.my_tests') }}" class="d-block mt-3">Back to my tests</a>
+{% endblock %}

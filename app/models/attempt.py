@@ -36,6 +36,7 @@ class AttemptQuestion(db.Model):
     attempt = db.relationship('Attempt', backref='attempt_questions')
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
     question = db.relationship('Question')
+    display_order = db.Column(db.Integer, nullable=False)
     __table_args__ = (db.UniqueConstraint('attempt_id', 'question_id', name='uq_attempt_question'),)
 
     def __repr__(self):

@@ -2,6 +2,7 @@ import random
 from app import db
 from datetime import datetime, timezone
 from app.models import Attempt, AttemptQuestion, Answer
+from app.services.time_utils import as_utc
 
 
 class DispatchExpiredError(Exception):
@@ -18,7 +19,7 @@ def start_or_resume_attempt(dispatch):
             return dispatch.attempt
         raise AttemptNotResumableError("This test has already been submitted.")
     
-    if dispatch.expires_at < now:
+    if as_utc(dispatch.expires_at) < now:
         dispatch.status = 'expired_no_attempt'
         db.session.commit()
         raise DispatchExpiredError("This test's validity window has expired.")
