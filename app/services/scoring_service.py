@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app import db
-from app.models import Answer
+from app.models import Answer, question
 
 
 def submit_attempt(attempt, form_data):
@@ -12,7 +12,9 @@ def submit_attempt(attempt, form_data):
     total_score = 0
 
     for question in questions:
-        answer = Answer(attempt_id=attempt.id, question_id=question.id)
+        answer = Answer.query.filter_by(attempt_id=attempt.id, question_id=question.id).first()
+        if answer is None:
+            answer = Answer(attempt_id=attempt.id, question_id=question.id)
 
         if question.type == "written":
             answer.written_text = form_data.get(f"question_{question.id}", "").strip()

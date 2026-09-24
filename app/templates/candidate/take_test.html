@@ -50,6 +50,8 @@
 
 <script>
     let remaining = {{ remaining_seconds }};
+    const dispatchId = {{ dispatch.id }};
+
     const timerEl = document.getElementById("timer");
     const form = document.getElementById("test-form");
 
@@ -68,6 +70,32 @@
         }
         remaining -= 1;
     }
+
+    function autosave(questionId, payload) {
+        fetch(`/candidate/tests/${dispatchId}/autosave`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question_id: questionId, ...payload }),
+        }).catch(() => {});  // best-effort — a failed autosave shouldn't interrupt the candidate
+    }
+
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+        input.addEventListener("change", () => {
+            const questionId = input.name.replace("question_", "");
+            const selected = Array.from(
+                document.querySelectorAll(`input[name="${input.name}"]:checked`)
+            ).map(el => parseInt(el.value));
+            autosave(questionId, { selected_option_ids: selected });
+        });
+    });
+
+    document.querySelectorAll("textarea").forEach(textarea => {
+        textarea.addEventListener("blur", () => {
+            const questionId = textarea.name.replace("question_", "");
+            autosave(questionId, { written_text: textarea.value });
+        });
+    });
+
 
     tick();
     const intervalId = setInterval(tick, 1000);

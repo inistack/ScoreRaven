@@ -50,11 +50,10 @@ def dispatch_test_to_emails(test, emails):
 
         try:
             dispatch = dispatch_test_to_email(test, email)
-            results['dispatched'].append(email)
+            # results['dispatched'].append(email)
+            results[0]["dispatched"].append(email)
         except Exception as e:
-            results["skipped"].append(email)
-    
+            results[0]["skipped"].append(email)
+
     return results
-
-
 

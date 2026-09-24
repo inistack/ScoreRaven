@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
-from flask import Blueprint, abort, render_template, request, redirect, url_for, flash
+from flask import Blueprint, abort, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import current_user
 from app.auth.decorators import roles_required
-from app.models import Dispatch, AttemptQuestion
+from app.models import Dispatch, AttemptQuestion, Question
 from app.services.attempt_service import start_or_resume_attempt, DispatchExpiredError, AttemptNotResumableError
 from app.services.scoring_service import submit_attempt
+from app.services.attempt_service import save_answer
 
 candidate_bp = Blueprint('candidate', __name__, url_prefix='/candidate')
 
@@ -104,3 +105,30 @@ def submit_test(dispatch_id):
 
     flash("Test submitted.", "success")
     return redirect(url_for("candidate.my_tests"))
+
+
+@candidate_bp.route("/tests/<int:dispatch_id>/autosave", methods=["POST"])
+@roles_required("candidate")
+def autosave(dispatch_id):
+    dispatch = Dispatch.query.get_or_404(dispatch_id)
+
+    if dispatch.candidate_id != current_user.id:
+        abort(403)
+    
+    attempt = dispatch.attempt
+    if attempt is None or attempt.status != 'in_progress':
+        return jsonify({"error": "not available"}), 409
+
+    data = request.get_json(silent=True) or {}
+    question = Question.query.get_or_404(data.get("question_id"))
+
+    if question.test_id != dispatch.test_id:
+        abort(400)
+    
+    save_answer(
+        attempt, question,
+        selected_option_ids=data.get("selected_option_ids"),
+        written_text=data.get("written_text"),
+    )
+    return jsonify({"status": "ok"})
+

@@ -148,8 +148,8 @@ def dispatch_test(test_id):
         db.session.commit()
 
         flash(
-            f"Dispatched to {len(results['dispatched'])} candidate(s). "
-            f"{len(results['skipped'])} skipped.",
+            f"Dispatched to {len(results[0]['dispatched'])} candidate(s). "
+            f"{len(results[0]['skipped'])} skipped.",
             "success",
         )
 

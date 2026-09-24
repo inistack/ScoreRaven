@@ -1,7 +1,7 @@
 import random
 from app import db
 from datetime import datetime, timezone
-from app.models import Attempt, AttemptQuestion
+from app.models import Attempt, AttemptQuestion, Answer
 
 
 class DispatchExpiredError(Exception):
@@ -42,3 +42,18 @@ def start_or_resume_attempt(dispatch):
     db.session.commit()
 
     return attempt
+
+
+def save_answer(attempt, question, selected_option_ids=None, written_text=None):
+    answer = Answer.query.filter_by(attempt_id=attempt.id, question_id=question.id).first()
+    if answer is None:
+        answer = Answer(attempt_id=attempt.id, question_id=question.id)
+        db.session.add(answer)
+
+    if question.type == "written":
+        answer.written_text = written_text
+    else:
+        answer.selected_option_ids = selected_option_ids
+
+    db.session.commit()
+    return answer

@@ -4,7 +4,6 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from config import Config
 
-
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
@@ -16,12 +15,16 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    
 
     login_manager.login_view = 'auth.login'
     
     with app.app_context():
         from app import models
     
+    from app.celery_app import init_celery
+    init_celery(app)
+    from app import tasks
     from app.auth.routes import auth_bp
     from app.dashboard.routes import dashboard_bp
     from app.admin.routes import admin_bp
