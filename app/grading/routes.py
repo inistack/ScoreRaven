@@ -94,3 +94,15 @@ def grade_history(attempt_id):
         .all()
     )
     return render_template("grading/history.html", attempt=attempt, history=history)
+
+
+@grading_bp.route("/history")
+@roles_required("admin", "grader")
+def all_history():
+    history = (
+        GradeHistory.query
+        .order_by(GradeHistory.changed_at.desc())
+        .limit(50)
+        .all()
+    )
+    return render_template("grading/all_history.html", history=history)

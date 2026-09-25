@@ -194,3 +194,52 @@ def release_all_results(test_id):
     count = release_results_for_test(test)
     flash(f"Released results to {count} candidate(s).", "success")
     return redirect(url_for("admin.edit_test", test_id=test_id))
+
+
+@admin_bp.route("/tests/<int:test_id>/questions/<int:question_id>/edit", methods=["GET", "POST"])
+@roles_required("admin")
+def edit_question(test_id, question_id):
+    test = Test.query.get_or_404(test_id)
+    question = Question.query.get_or_404(question_id)
+    if question.test_id != test_id:
+        abort(404)
+
+    locked_response = ensure_test_unlocked(test)
+    if locked_response:
+        return locked_response
+
+    form = QuestionForm(obj=question)
+    if request.method == "GET":
+        for i, option in enumerate(sorted(question.options, key=lambda o: o.display_order)):
+            if i < len(form.options):
+                form.options[i].text.data = option.text
+                form.options[i].is_correct.data = option.is_correct
+
+    if form.validate_on_submit():
+        raw_options = [
+            {"text": o.text.data.strip(), "is_correct": o.is_correct.data}
+            for o in form.options
+            if o.text.data and o.text.data.strip()
+        ]
+
+        try:
+            validate_question_options(form.type.data, raw_options)
+        except QuestionValidationError as e:
+            flash(str(e), "error")
+            return render_template("admin/question_form.html", form=form, test=test, question=question)
+
+        question.type = form.type.data
+        question.prompt = form.prompt.data
+        question.points = form.points.data
+
+        Option.query.filter_by(question_id=question.id).delete()
+        for i, opt in enumerate(raw_options):
+            db.session.add(Option(
+                question_id=question.id, text=opt["text"], is_correct=opt["is_correct"], display_order=i,
+            ))
+
+        db.session.commit()
+        flash("Question updated.", "success")
+        return redirect(url_for("admin.edit_test", test_id=test.id))
+
+    return render_template("admin/question_form.html", form=form, test=test, question=question)

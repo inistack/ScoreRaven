@@ -8,42 +8,42 @@
 
 <form method="POST">
     {% for answer in answers %}
-        {% set question = answer.question %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <p class="card-text">
-                    <strong>{{ question.prompt }}</strong>
-                    <span class="badge bg-light text-dark">{{ question.points }} pt(s)</span>
-                </p>
+    {% set question = answer.question %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text">
+                <strong>{{ question.prompt }}</strong>
+                <span class="badge bg-light text-dark">{{ question.points }} pt(s)</span>
+            </p>
 
-                {% if question.type == "written" %}
-                    <div class="border rounded p-2 mb-3 bg-light">
-                        {{ answer.written_text or "(no answer submitted)" }}
-                    </div>
-
-                    <div class="row g-2">
-                        <div class="col-auto">
-                            <select name="correct_{{ answer.id }}" class="form-select form-select-sm">
-                                <option value="yes" {{ "selected" if answer.is_correct }}>Correct</option>
-                                <option value="no" {{ "selected" if answer.is_correct == False }}>Incorrect</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <input type="number" name="points_{{ answer.id }}" class="form-control form-control-sm"
-                                   style="width: 90px;" min="0" max="{{ question.points }}"
-                                   value="{{ answer.points_awarded if answer.points_awarded is not none else '' }}"
-                                   placeholder="Points">
-                        </div>
-                    </div>
-
-                {% else %}
-                    <p class="text-muted small mb-0">
-                        Auto-scored: {{ "Correct" if answer.is_correct else "Incorrect" }}
-                        ({{ answer.points_awarded }} pt(s))
-                    </p>
-                {% endif %}
+            {% if question.type == "written" %}
+            <div class="border rounded p-2 mb-3" style="background: var(--sr-surface-2); color: var(--sr-text);">
+                {{ answer.written_text or "(no answer submitted)" }}
             </div>
+
+            <div class="row g-2">
+                <div class="col-auto">
+                    <select name="correct_{{ answer.id }}" class="form-select form-select-sm">
+                        <option value="yes" {{ "selected" if answer.is_correct }}>Correct</option>
+                        <option value="no" {{ "selected" if answer.is_correct==False }}>Incorrect</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <input type="number" name="points_{{ answer.id }}" class="form-control form-control-sm"
+                        style="width: 90px;" min="0" max="{{ question.points }}"
+                        value="{{ answer.points_awarded if answer.points_awarded is not none else '' }}"
+                        placeholder="Points">
+                </div>
+            </div>
+
+            {% else %}
+            <p class="text-muted small mb-0">
+                Auto-scored: {{ "Correct" if answer.is_correct else "Incorrect" }}
+                ({{ answer.points_awarded }} pt(s))
+            </p>
+            {% endif %}
         </div>
+    </div>
     {% endfor %}
 
     <button type="submit" class="btn btn-primary">Save Grades</button>

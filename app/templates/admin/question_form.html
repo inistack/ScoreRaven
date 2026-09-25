@@ -3,9 +3,11 @@
 {% block container_class %}container-form{% endblock %}
 
 {% block content %}
-<h2 class="font-serif mb-4" style="font-size: 1.85rem;">Add Question to "{{ test.title }}"</h2>
+<h2 class="font-serif mb-4" style="font-size: 1.85rem;">
+    {{ "Edit Question" if question else "Add Question" }}{% if not question %} to "{{ test.title }}"{% endif %}
+</h2>
 
-<form method="POST">
+<form method="POST" action="{{ url_for('admin.edit_question', test_id=test.id, question_id=question.id) if question else url_for('admin.new_question', test_id=test.id) }}">
     {{ form.hidden_tag() }}
 
     <div class="mb-3">

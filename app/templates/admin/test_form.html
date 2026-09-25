@@ -84,9 +84,15 @@
 {% if test.questions %}
 <ul class="list-group mb-3">
     {% for q in test.questions %}
-    <li class="list-group-item">
-        {{ q.prompt[:80] }}{{ "..." if q.prompt|length > 80 else "" }}
-        <span class="badge bg-secondary">{{ q.type }}</span>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            {{ q.prompt[:80] }}{{ "..." if q.prompt|length > 80 else "" }}
+            <span class="badge bg-secondary">{{ q.type }}</span>
+        </span>
+        <a href="{{ url_for('admin.edit_question', test_id=test.id, question_id=q.id) }}"
+            class="btn btn-sm btn-outline-primary">
+            Edit
+        </a>
     </li>
     {% endfor %}
 </ul>
