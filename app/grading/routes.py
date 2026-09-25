@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, flash, abort, redirect, url_for, request
 from flask_login import current_user
 from app.auth.decorators import roles_required
-from app.models import Attempt
+from app.models import Attempt, GradeHistory
 from app import db
 from datetime import datetime, timezone
 from app.services.grading_service import apply_grades
@@ -81,3 +81,16 @@ def grade_attempt(attempt_id):
 
     return render_template("grading/grade_attempt.html", attempt=attempt, answers=answers)   
 
+
+@grading_bp.route("/attempts/<int:attempt_id>/history")
+@roles_required("admin", "grader")
+def grade_history(attempt_id):
+    attempt = Attempt.query.get_or_404(attempt_id)
+    answer_ids = [a.id for a in attempt.answers]
+    history = (
+        GradeHistory.query
+        .filter(GradeHistory.answer_id.in_(answer_ids))
+        .order_by(GradeHistory.changed_at.desc())
+        .all()
+    )
+    return render_template("grading/history.html", attempt=attempt, history=history)

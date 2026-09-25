@@ -15,34 +15,40 @@
                 ScoreRaven
             </a>
 
-            {% if not current_user.is_authenticated %}
-                <div class="sr-nav-links">
-                    <a href="{{ url_for('main.landing') }}#platform">Platform</a>
-                    <a href="{{ url_for('main.landing') }}#how-it-works">How it works</a>
-                    <a href="{{ url_for('main.landing') }}#security">Security</a>
-                </div>
-                <div class="sr-nav-right">
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-secondary">Log in</a>
-                    <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary">Get started</a>
-                </div>
-            {% else %}
-                <div class="sr-nav-links">
-                    {% if current_user.role == 'admin' %}
-                        <a href="{{ url_for('admin.new_test') }}">New test</a>
-                        <a href="{{ url_for('grading.index') }}">Grading queue</a>
-                        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
-                    {% elif current_user.role == 'grader' %}
-                        <a href="{{ url_for('grading.queue') }}">Grading queue</a>
-                        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
-                    {% else %}
-                        <a href="{{ url_for('candidate.my_tests') }}">My tests</a>
-                    {% endif %}
-                </div>
-                <div class="sr-nav-right">
-                    <span class="sr-nav-user">{{ current_user.name or current_user.email }}</span>
-                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-secondary">Log out</a>
-                </div>
-            {% endif %}
+            <button type="button" class="sr-nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="sr-nav-menu" id="navMenu">
+                {% if not current_user.is_authenticated %}
+                    <div class="sr-nav-links">
+                        <a href="{{ url_for('main.landing') }}#platform">Platform</a>
+                        <a href="{{ url_for('main.landing') }}#how-it-works">How it works</a>
+                        <a href="{{ url_for('main.landing') }}#security">Security</a>
+                    </div>
+                    <div class="sr-nav-right">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-secondary">Log in</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary">Get started</a>
+                    </div>
+                {% else %}
+                    <div class="sr-nav-links">
+                        {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin.new_test') }}">New test</a>
+                            <a href="{{ url_for('grading.index') }}">Grading queue</a>
+                            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+                        {% elif current_user.role == 'grader' %}
+                            <a href="{{ url_for('grading.queue') }}">Grading queue</a>
+                            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('candidate.my_tests') }}">My tests</a>
+                        {% endif %}
+                    </div>
+                    <div class="sr-nav-right">
+                        <span class="sr-nav-user">{{ current_user.name or current_user.email }}</span>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-secondary">Log out</a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
@@ -70,6 +76,33 @@
             <span>&copy; {{ now_year }} ScoreRaven. Built for schools, training teams, and certification bodies.</span>
         </div>
     </footer>
+
+    <script>
+        const navToggle = document.getElementById("navToggle");
+        const navMenu = document.getElementById("navMenu");
+
+        navToggle.addEventListener("click", () => {
+            const isOpen = navMenu.classList.toggle("open");
+            navToggle.classList.toggle("open", isOpen);
+            navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        navMenu.querySelectorAll("a").forEach(link => {
+            link.addEventListener("click", () => {
+                navMenu.classList.remove("open");
+                navToggle.classList.remove("open");
+                navToggle.setAttribute("aria-expanded", "false");
+            });
+        });
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 640) {
+                navMenu.classList.remove("open");
+                navToggle.classList.remove("open");
+                navToggle.setAttribute("aria-expanded", "false");
+            }
+        });
+    </script>
 
 </body>
 </html>

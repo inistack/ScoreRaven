@@ -21,6 +21,10 @@ def init_celery(app):
         "task": "app.tasks.release_stale_claims",
         "schedule": 900.0,  # every 15 minutes
     },
+    "release-scheduled-results": {
+    "task": "app.tasks.release_scheduled_results",
+    "schedule": 300.0,  # every 5 minutes
+},
 }
 
     class ContextTask(celery.Task):

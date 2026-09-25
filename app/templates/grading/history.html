@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Grade History — ScoreRaven{% endblock %}
+{% block container_class %}container-medium{% endblock %}
+
+{% block content %}
+<h2 class="font-serif mb-4" style="font-size: 1.85rem;">Grade History</h2>
+<p class="text-muted mb-4">Candidate #{{ attempt.dispatch.candidate_id }} — {{ attempt.dispatch.test.title }}</p>
+
+{% if history %}
+    <ul class="list-group">
+        {% for h in history %}
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <span>Question #{{ h.answer.question_id }}</span>
+                    <span class="text-muted small">{{ h.changed_at.strftime("%b %d, %Y %H:%M") }}</span>
+                </div>
+                <p class="mb-0 small text-muted">
+                    {{ h.previous_points }} pt(s) ({{ "Correct" if h.previous_is_correct else "Incorrect" }})
+                    &rarr;
+                    {{ h.new_points }} pt(s) ({{ "Correct" if h.new_is_correct else "Incorrect" }})
+                </p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="text-muted">No regrades on record for this attempt.</p>
+{% endif %}
+{% endblock %}

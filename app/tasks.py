@@ -4,6 +4,7 @@ from app.celery_app import celery
 from app import db
 from app.models import Attempt, Dispatch
 from app.services.scoring_service import submit_attempt
+from app.services.results_service import release_due_scheduled_tests
 
 
 @celery.task
@@ -55,3 +56,7 @@ def release_stale_claims():
 
     db.session.commit()
     return released_count
+
+@celery.task
+def release_due_scheduled_tests_task():
+    return release_due_scheduled_tests()

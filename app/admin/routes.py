@@ -4,6 +4,7 @@ from app.models import Test, Dispatch, Question, Option
 from app.auth.decorators import roles_required
 from app.admin.forms import TestForm, QuestionForm, DispatchForm
 from flask_login import current_user
+from app.models.subject import Subject
 from app.services.question_validation import validate_question_options, QuestionValidationError
 from app.services.subject_service import get_or_create_subject
 from app.services.dispatch_service import dispatch_test_to_emails
@@ -21,6 +22,9 @@ def new_test():
     form = TestForm()
 
     if form.validate_on_submit():
+        if form.release_mode.data == "scheduled" and not form.scheduled_release_at.data:
+            flash("Set a release date and time for a scheduled test.", "error")
+            return render_template("admin/test_form.html", form=form, subjects=Subject.query.order_by(Subject.name).all())
         test = Test(
             title = form.title.data,
             subject = get_or_create_subject(form.subject_name.data),
@@ -31,7 +35,9 @@ def new_test():
             ),
             time_limit_seconds=form.time_limit_minutes.data * 60,
             validity_hours=form.validity_hours.data,
-            created_by=current_user.id
+            created_by=current_user.id,
+            scheduled_release_at=(
+            form.scheduled_release_at.data if form.release_mode.data == "scheduled" else None),
         )
         db.session.add(test)
         db.session.commit()
@@ -56,6 +62,10 @@ def edit_test(test_id):
         form.time_limit_minutes.data = test.time_limit_seconds // 60
 
     if form.validate_on_submit():
+        if form.release_mode.data == "scheduled" and not form.scheduled_release_at.data:
+            flash("Set a release date and time for a scheduled test.", "error")
+            return render_template("admin/test_form.html", form=form, subjects=Subject.query.order_by(Subject.name).all())
+        
         subject = get_or_create_subject(form.subject_name.data)
         test.title = form.title.data
         test.subject_id = subject.id
@@ -66,6 +76,7 @@ def edit_test(test_id):
         )
         test.time_limit_seconds = form.time_limit_minutes.data * 60
         test.validity_hours = form.validity_hours.data
+        test.scheduled_release_at = (form.scheduled_release_at.data if form.release_mode.data == "scheduled" else None)
         db.session.commit()
         flash("Test updated.", "success")
         return redirect(url_for("admin.edit_test", test_id=test.id))

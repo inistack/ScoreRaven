@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField, SubmitField, IntegerField, TextAreaField, FormField, FieldList
-from wtforms.validators import DataRequired, Length, NumberRange
+from wtforms import StringField, SelectField, BooleanField, SubmitField, IntegerField, TextAreaField, FormField, FieldList, DateTimeLocalField
+from wtforms.validators import DataRequired, Length, NumberRange, Optional
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 
@@ -19,6 +19,11 @@ class TestForm(FlaskForm):
         "Validity Window (hours)",
         validators=[DataRequired(), NumberRange(min=1, message="Must be at least 1 hour.")],
     )
+    scheduled_release_at = DateTimeLocalField(
+    "Release results at",
+    format="%Y-%m-%dT%H:%M",
+    validators=[Optional()],
+)
     submit = SubmitField('Save Test')
 
 

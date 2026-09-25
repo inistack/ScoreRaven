@@ -20,6 +20,7 @@ class Test(db.Model):
 
     published_at = db.Column(db.DateTime, nullable=True)
     is_locked = db.Column(db.Boolean, nullable=False, default=False)
+    scheduled_release_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (

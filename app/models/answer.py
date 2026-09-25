@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime, timezone
 
 class Answer(db.Model):
     __tablename__ = 'answers'
@@ -24,3 +25,22 @@ class Answer(db.Model):
 
     def __repr__(self):
         return f"<Answer attempt={self.attempt_id} question={self.question_id}>"
+    
+
+class GradeHistory(db.Model):
+    __tablename__ = "grade_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    answer_id = db.Column(db.Integer, db.ForeignKey("answers.id"), nullable=False)
+    answer = db.relationship("Answer", backref="grade_history")
+
+    previous_is_correct = db.Column(db.Boolean, nullable=True)
+    previous_points = db.Column(db.Integer, nullable=True)
+    new_is_correct = db.Column(db.Boolean, nullable=True)
+    new_points = db.Column(db.Integer, nullable=True)
+
+    changed_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    grader = db.relationship("User", backref="grade_history_entries")
+
+    changed_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))

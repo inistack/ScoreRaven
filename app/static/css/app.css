@@ -156,6 +156,42 @@ a { text-decoration: none; }
   margin-right: 0.25rem;
 }
 
+.sr-nav-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.sr-nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--sr-border);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sr-nav-toggle span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: var(--sr-text);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.sr-nav-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.sr-nav-toggle.open span:nth-child(2) { opacity: 0; }
+.sr-nav-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
 /* ==========================================================================
    Page containers
    ========================================================================== */
@@ -488,11 +524,52 @@ a { text-decoration: none; }
 
 @media (max-width: 640px) {
   .sr-nav { padding: 0.85rem 0; }
-  .sr-nav-inner { gap: 0.75rem 1rem; }
-  .sr-nav-links { gap: 1rem; width: 100%; order: 3; }
-  .sr-nav-links a:not(.btn) { font-size: 0.85rem; }
-  .sr-nav-user { display: none; }
+  .sr-nav-inner { gap: 0.75rem 1rem; flex-wrap: nowrap; }
   .sr-logo { font-size: 1.3rem; }
+
+  .sr-nav-toggle { display: flex; }
+
+  .sr-nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--sr-canvas);
+    border-bottom: 1px solid var(--sr-border);
+    padding: 0.5rem 1.5rem 1.25rem;
+  }
+
+  .sr-nav-menu.open { display: flex; }
+
+  .sr-nav-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    width: 100%;
+  }
+
+  .sr-nav-links a:not(.btn) {
+    width: 100%;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--sr-border);
+  }
+
+  .sr-nav-right {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+  }
+
+  .sr-nav-right .btn { width: 100%; }
+  .sr-nav-user { display: block; margin: 0 0 0.25rem; }
+
+  .sr-nav { position: relative; }
 
   .hero { padding: 2.75rem 1.25rem 3rem; }
   .hero-ctas .btn { width: 100%; }
