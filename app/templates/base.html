@@ -1,23 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}ScoreRaven{% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5" style="max-width: 480px;">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
-        {% block content %}{% endblock %}
-    </div>
+    <nav class="sr-nav">
+        <div class="sr-nav-inner">
+            <a href="{{ url_for('main.landing') if not current_user.is_authenticated else url_for('dashboard.index') }}" class="sr-logo">
+                ScoreRaven
+            </a>
+
+            {% if not current_user.is_authenticated %}
+                <div class="sr-nav-links">
+                    <a href="{{ url_for('main.landing') }}#platform">Platform</a>
+                    <a href="{{ url_for('main.landing') }}#how-it-works">How it works</a>
+                    <a href="{{ url_for('main.landing') }}#security">Security</a>
+                </div>
+                <div class="sr-nav-right">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-secondary">Log in</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary">Get started</a>
+                </div>
+            {% else %}
+                <div class="sr-nav-links">
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.new_test') }}">New test</a>
+                        <a href="{{ url_for('grading.index') }}">Grading queue</a>
+                        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+                    {% elif current_user.role == 'grader' %}
+                        <a href="{{ url_for('grading.queue') }}">Grading queue</a>
+                        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('candidate.my_tests') }}">My tests</a>
+                    {% endif %}
+                </div>
+                <div class="sr-nav-right">
+                    <span class="sr-nav-user">{{ current_user.name or current_user.email }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-secondary">Log out</a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        {% block page %}
+            <div class="{% block container_class %}container-app{% endblock %}">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        {% endblock %}
+    </main>
+
+    <footer class="sr-footer">
+        <div class="sr-footer-inner">
+            <span class="sr-logo" style="font-size: 1.1rem;">ScoreRaven</span>
+            <span>&copy; {{ now_year }} ScoreRaven. Built for schools, training teams, and certification bodies.</span>
+        </div>
+    </footer>
+
 </body>
 </html>

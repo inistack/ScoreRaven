@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Dispatch — {{ test.title }} — ScoreRaven{% endblock %}
+{% block container_class %}container-form{% endblock %}
 
 {% block content %}
-<h2 class="mb-2">Dispatch Test</h2>
+<h2 class="font-serif mb-2" style="font-size: 1.85rem;">Dispatch Test</h2>
 <p class="text-muted">{{ test.title }} · {{ test.difficulty }} · {{ test.questions|length }} question(s)</p>
 
 <form method="POST" enctype="multipart/form-data">

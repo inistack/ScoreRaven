@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Add Question — ScoreRaven{% endblock %}
+{% block container_class %}container-form{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Add Question to "{{ test.title }}"</h2>
+<h2 class="font-serif mb-4" style="font-size: 1.85rem;">Add Question to "{{ test.title }}"</h2>
 
 <form method="POST">
     {{ form.hidden_tag() }}

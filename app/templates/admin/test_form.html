@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{{ "Edit" if test else "New" }} Test — ScoreRaven{% endblock %}
+{% block container_class %}container-medium{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">{{ "Edit" if test else "New" }} Test</h2>
+<h2 class="font-serif mb-4" style="font-size: 1.85rem;">{{ "Edit" if test else "New" }} Test</h2>
 
 <form method="POST">
     {{ form.hidden_tag() }}

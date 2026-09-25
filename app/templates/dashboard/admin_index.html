@@ -2,7 +2,7 @@
 {% block title %}Dashboard — ScoreRaven{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Welcome, {{ current_user.name or current_user.email }}</h2>
+<h2 class="font-serif mb-4" style="font-size: 1.85rem;">Welcome, {{ current_user.name or current_user.email }}</h2>
 
 <div class="row g-3 mb-4">
     <div class="col-4">
@@ -41,5 +41,4 @@
     {% endfor %}
 </ul>
 
-<a href="{{ url_for('auth.logout') }}">Log out</a>
 {% endblock %}

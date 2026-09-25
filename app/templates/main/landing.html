@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}ScoreRaven — Testing that stays out of the way{% endblock %}
+
+{% block page %}
+
+<section class="hero">
+    <div class="hero-grid">
+        <div>
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Built for real exams, not demos
+            </div>
+
+            <p class="hero-kicker">ScoreRaven / computer-based testing for schools, training teams, and certification bodies.</p>
+
+            <h1 class="font-serif">Testing that<br>stays out of<br>the way.</h1>
+
+            <p class="lead">
+                Write a test, send it to the people who need to take it, and get
+                clear results back — with timed attempts, randomized question
+                order, and a proper review queue for anything that needs a
+                human eye.
+            </p>
+
+            <div class="hero-ctas">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get started</a>
+                <a href="#how-it-works" class="btn btn-outline-secondary btn-lg">See how it works</a>
+            </div>
+
+            <p class="hero-footnote">No deployment, no proctoring hardware. Candidates just need a browser.</p>
+        </div>
+
+        <div>
+            <div class="monitor-card">
+                <div class="monitor-head">
+                    <span>Session monitor</span>
+                    <span class="monitor-live"><span class="monitor-live-dot"></span> Live</span>
+                </div>
+                <div class="monitor-title">Applied Safety Assessment</div>
+
+                <div class="monitor-body">
+                    <div class="monitor-col">
+                        <div class="monitor-stat-row">
+                            <span class="monitor-label" style="margin:0;">Completion</span>
+                            <span class="value">14 / 18</span>
+                        </div>
+                        <svg class="sparkline" viewBox="0 0 220 64" preserveAspectRatio="none">
+                            <polyline points="0,52 25,46 50,48 75,36 100,38 125,24 150,28 175,14 200,18 220,8"
+                                      fill="none" stroke="#4c82f7" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="monitor-col">
+                        <div class="monitor-label">Time remaining</div>
+                        <div class="monitor-big-stat">18<sup>:24</sup></div>
+                        <p class="monitor-sub">Auto-submits at zero</p>
+
+                        <ul class="monitor-checklist">
+                            <li>Question order randomized</li>
+                            <li>Answers saved as you go</li>
+                            <li>Single attempt per invite</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="monitor-foot">Validity window: 46:12 remaining</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="how-it-works">
+    <div class="section-head">
+        <h2 class="font-serif">From draft to released result</h2>
+        <p>Three steps, the same for a five-question quiz or a full certification exam.</p>
+    </div>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-num font-serif">1</div>
+            <h3>Author the test</h3>
+            <p>Mix single-answer, multiple-answer, true/false, and written questions. Set a time limit and how long candidates have to start.</p>
+        </div>
+        <div class="step">
+            <div class="step-num font-serif">2</div>
+            <h3>Dispatch to candidates</h3>
+            <p>Upload a list or a CSV. Each candidate gets their own invite, their own clock, and their own randomized question order.</p>
+        </div>
+        <div class="step">
+            <div class="step-num font-serif">3</div>
+            <h3>Grade and release</h3>
+            <p>Objective questions score themselves. Written answers go to a review queue — graded blind, released to candidates on your schedule.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="platform">
+    <div class="section-head">
+        <h2 class="font-serif">Built for people who run real assessments</h2>
+        <p>Different stakes, same platform underneath.</p>
+    </div>
+
+    <div class="segments">
+        <div class="segment">
+            <h3>Schools</h3>
+            <p>Quizzes and end-of-term exams without printing a single paper.</p>
+        </div>
+        <div class="segment">
+            <h3>Training teams</h3>
+            <p>Knowledge checks tied to a course, with results by subject over time.</p>
+        </div>
+        <div class="segment">
+            <h3>Employers</h3>
+            <p>Screening assessments that fit into a hiring pipeline, not around it.</p>
+        </div>
+        <div class="segment">
+            <h3>Certification bodies</h3>
+            <p>High-stakes exams with a real grading queue and a clear audit trail.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="security">
+    <div class="section-head">
+        <h2 class="font-serif">Grading stays fair by default</h2>
+        <p>A few things ScoreRaven enforces on its own, not as an afterthought.</p>
+    </div>
+
+    <div class="segments" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="segment">
+            <h3>Blind grading</h3>
+            <p>Graders see a candidate's answers, never their name.</p>
+        </div>
+        <div class="segment">
+            <h3>Server-side timing</h3>
+            <p>The clock runs on ScoreRaven's servers, not the candidate's browser.</p>
+        </div>
+        <div class="segment">
+            <h3>One attempt, honestly enforced</h3>
+            <p>A candidate can resume a dropped connection — never restart a finished attempt.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

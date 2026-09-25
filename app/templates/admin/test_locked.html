@@ -2,7 +2,7 @@
 {% block title %}{{ test.title }} — Locked — ScoreRaven{% endblock %}
 
 {% block content %}
-<h2 class="mb-2">{{ test.title }}</h2>
+<h2 class="font-serif mb-2" style="font-size: 1.85rem;">{{ test.title }}</h2>
 <p class="text-muted">{{ test.difficulty }} · {{ test.questions|length }} question(s)</p>
 
 <div class="alert alert-secondary">
@@ -31,6 +31,7 @@
     </form>
 {% endif %}
 <h4 class="mt-4">Dispatches</h4>
+<div class="table-responsive-wrap">
 <table class="table">
     <thead><tr><th>Candidate</th><th>Status</th><th>Score</th><th></th></tr></thead>
     <tbody>
@@ -52,6 +53,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 
 <h4 class="mt-4">Questions</h4>
 <ul class="list-group mb-3">

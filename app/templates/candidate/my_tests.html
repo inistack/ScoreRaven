@@ -2,7 +2,7 @@
 {% block title %}My Tests — ScoreRaven{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">My Tests</h2>
+<h2 class="font-serif mb-4" style="font-size: 1.85rem;">My Tests</h2>
 
 {% if in_progress %}
 <h5 class="text-primary">In Progress</h5>
@@ -87,7 +87,4 @@
 {% endif %}
 
 <a href="{{ url_for('dashboard.index') }}" class="d-block mt-4">Back to Dashboard</a>
-<div class="mb-4 text-end">
-    <a href="{{ url_for('auth.logout') }}">Log out</a>
-</div>
 {% endblock %}

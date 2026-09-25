@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ dispatch.test.title }} — ScoreRaven{% endblock %}
+{% block container_class %}container-medium{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">{{ dispatch.test.title }}</h2>
-    <div id="timer" class="badge bg-dark fs-6"></div>
+<div class="d-flex justify-content-between align-items-center mb-4" style="flex-wrap: wrap; gap: 0.75rem;">
+    <h2 class="font-serif mb-0" style="font-size: 1.85rem;">{{ dispatch.test.title }}</h2>
+    <div id="timer" class="badge bg-primary fs-6"></div>
 </div>
 
 <form method="POST" action="{{ url_for('candidate.submit_test', dispatch_id=dispatch.id) }}" id="test-form">
