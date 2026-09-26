@@ -243,3 +243,40 @@ def edit_question(test_id, question_id):
         return redirect(url_for("admin.edit_test", test_id=test.id))
 
     return render_template("admin/question_form.html", form=form, test=test, question=question)
+
+
+@admin_bp.route('/tests/<int:test_id>/delete', methods=['POST'])
+@roles_required('admin')
+def delete_test(test_id):
+    test = Test.query.get_or_404(test_id)
+
+    locked_response = ensure_test_unlocked(test)
+    if locked_response:
+        return locked_response
+
+    db.session.delete(test)
+    db.session.commit()
+    flash("Test deleted.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+
+@admin_bp.route('/tests/<int:test_id>/questions/<int:question_id>/delete', methods=['POST'])
+@roles_required('admin')
+def delete_question(test_id, question_id):
+    test = Test.query.get_or_404(test_id)
+    question = Question.query.get_or_404(question_id)
+
+    if question.test_id != test_id:
+        abort(404)
+    
+    locked_response = ensure_test_unlocked(test)
+
+    if locked_response:
+        return locked_response
+    
+    db.session.delete(question)
+    db.session.commit()
+    flash("Question deleted.", "success")
+    return redirect(url_for("admin.edit_test", test_id=test.id))
+
+

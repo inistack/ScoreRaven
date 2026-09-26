@@ -5,7 +5,7 @@ class Question(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), nullable=False)
-    test = db.relationship('Test', backref="questions")
+    test = db.relationship("Test", backref=db.backref("questions", cascade="all, delete-orphan"))
 
     type = db.Column(db.String(20), nullable=False)
     prompt = db.Column(db.Text, nullable=False)
@@ -26,7 +26,7 @@ class Option(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
-    question = db.relationship('Question', backref='options')
+    question = db.relationship("Question", backref=db.backref("options", cascade="all, delete-orphan"))
     text = db.Column(db.Text, nullable=False)
     is_correct = db.Column(db.Boolean, nullable=False, default=False)
 

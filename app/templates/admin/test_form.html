@@ -89,10 +89,16 @@
             {{ q.prompt[:80] }}{{ "..." if q.prompt|length > 80 else "" }}
             <span class="badge bg-secondary">{{ q.type }}</span>
         </span>
-        <a href="{{ url_for('admin.edit_question', test_id=test.id, question_id=q.id) }}"
-            class="btn btn-sm btn-outline-primary">
-            Edit
-        </a>
+        <span class="d-flex gap-2">
+            <a href="{{ url_for('admin.edit_question', test_id=test.id, question_id=q.id) }}"
+                class="btn btn-sm btn-outline-primary">
+                Edit
+            </a>
+            <form method="POST" action="{{ url_for('admin.delete_question', test_id=test.id, question_id=q.id) }}"
+                onsubmit="return confirm('Delete this question? This cannot be undone.');">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+        </span>
     </li>
     {% endfor %}
 </ul>
@@ -111,6 +117,12 @@
     <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
         Back to Dashboard
     </a>
+    <form method="POST" action="{{ url_for('admin.delete_test', test_id=test.id) }}"
+        onsubmit="return confirm('Delete this entire test and all its questions? This cannot be undone.');"
+        class="d-inline">
+        <button type="submit" class="btn btn-outline-danger">Delete Test</button>
+    </form>
 </div>
+
 {% endif %}
 {% endblock %}
