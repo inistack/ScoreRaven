@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Preview — {{ test.title }} — ScoreRaven{% endblock %}
+{% block container_class %}container-medium{% endblock %}
+
+{% block content %}
+<div class="alert alert-warning">
+    Preview mode — this is a read-only look at what a candidate sees. Nothing here is saved,
+    and question order will differ for each real candidate.
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4" style="flex-wrap: wrap; gap: 0.75rem;">
+    <h2 class="font-serif mb-0" style="font-size: 1.85rem;">{{ test.title }}</h2>
+    <span class="badge bg-primary">{{ test.time_limit_seconds // 60 }} min</span>
+</div>
+
+{% for question in questions %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text">
+                <strong>{{ loop.index }}.</strong> {{ question.prompt }}
+                <span class="badge bg-light text-dark">{{ question.points }} pt(s)</span>
+            </p>
+
+            {% if question.type == "written" %}
+                <textarea class="form-control" rows="4" disabled placeholder="Candidate writes their answer here"></textarea>
+
+            {% elif question.type == "multi" %}
+                {% for option in question.options|sort(attribute="display_order") %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" disabled>
+                        <label class="form-check-label">{{ option.text }}</label>
+                    </div>
+                {% endfor %}
+
+            {% else %}
+                {% for option in question.options|sort(attribute="display_order") %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" disabled>
+                        <label class="form-check-label">{{ option.text }}</label>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<a href="{{ url_for('admin.edit_test', test_id=test.id) if not test.is_locked else url_for('admin.edit_test', test_id=test.id) }}" class="d-block mt-3">
+    Back to test
+</a>
+{% endblock %}

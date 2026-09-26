@@ -49,10 +49,21 @@ def extract_emails_from_csv(file_storage):
     return emails
 
 
+def _normalize_header(name):
+    return name.strip().lower().replace(" ", "").replace("-", "").replace("_", "")
+
+
 def _find_email_column(fieldnames):
     if not fieldnames:
         return None
+
+    exact_matches = {"email", "emailaddress", "emailid", "e mail"}
+
     for name in fieldnames:
-        if name and name.strip().lower() == "email":
+        if not name:
+            continue
+        normalized = _normalize_header(name)
+        if normalized in exact_matches or normalized.endswith("email"):
             return name
+
     return None
