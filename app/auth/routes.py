@@ -12,7 +12,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        existing_user = User.query.filter_by(email=form.email.data).first()
+        existing_user = User.query.filter(db.func.lower(User.email) == form.email.data.lower()).first()
         if existing_user:
             flash("An account with that email already exists.", "error")
             return redirect(url_for('auth.register'))
