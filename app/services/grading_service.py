@@ -1,8 +1,12 @@
 from datetime import datetime, timezone
 from app import db
 from app.models import GradeHistory
+from app.services.results_service import release_immediately_if_due, notify_released
+
 
 def apply_grades(attempt, form_data, grader_id):
+    was_pending = attempt.status == "pending_grading"
+
     written_answers = [a for a in attempt.answers if a.question.type == "written"]
 
     for answer in written_answers:
@@ -35,13 +39,20 @@ def apply_grades(attempt, form_data, grader_id):
 
     still_pending = any(a.is_correct is None for a in attempt.answers)
 
+    should_notify = False
     if not still_pending:
         attempt.status = "graded"
         attempt.score = sum(a.points_awarded or 0 for a in attempt.answers)
         attempt.claimed_by = None
         attempt.claimed_at = None
+        if was_pending:
+            should_notify = release_immediately_if_due(attempt)
 
     db.session.commit()
+
+    if should_notify:
+        notify_released([attempt.dispatch_id])
+
     return still_pending
 
 

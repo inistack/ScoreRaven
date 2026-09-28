@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from app import db
 from app.models import Answer, question
+from app.services.results_service import release_immediately_if_due, notify_released
+
 
 
 def submit_attempt(attempt, form_data):
@@ -44,5 +46,9 @@ def submit_attempt(attempt, form_data):
         attempt.score = total_score
 
     attempt.dispatch.status = 'completed'
+    should_notify = release_immediately_if_due(attempt)
     db.session.commit()
+
+    if should_notify:
+        notify_released([attempt.dispatch_id])
     

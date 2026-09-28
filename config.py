@@ -15,3 +15,4 @@ class Config:
     EMAIL_FROM = os.environ.get("EMAIL_FROM")
     CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
     CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+    APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")

@@ -5,6 +5,7 @@ from app import db
 from app.models import Attempt, Dispatch
 from app.services.scoring_service import submit_attempt
 from app.services.results_service import release_due_scheduled_tests
+from app.emails.results_email import send_results_released_email
 
 
 @celery.task
@@ -60,3 +61,12 @@ def release_stale_claims():
 @celery.task
 def release_due_scheduled_tests_task():
     return release_due_scheduled_tests()
+
+@celery.task(autoretry_for=(Exception,), retry_backoff=True, retry_backoff_max=600, max_retries=5)
+def send_results_released_email_task(dispatch_id):
+    dispatch = db.session.get(Dispatch, dispatch_id)
+    if dispatch is None:
+        return
+    send_results_released_email(dispatch.candidate.email, dispatch)
+
+
