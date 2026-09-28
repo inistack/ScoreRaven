@@ -1,5 +1,5 @@
 from app import db
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, session
 from app.models import Test, Dispatch, Question, Option
 from app.auth.decorators import roles_required
 from app.admin.forms import TestForm, QuestionForm, DispatchForm
@@ -51,10 +51,12 @@ def new_test():
 @roles_required('admin')
 def edit_test(test_id):
     test = Test.query.get_or_404(test_id)
+    dispatch_skipped = session.pop("dispatch_skipped", None)
+
 
     if test.is_locked:
         flash("This test has been dispatched and can no longer be edited.", "error")
-        return render_template("admin/test_locked.html", test=test)
+        return render_template("admin/test_locked.html", test=test, dispatch_skipped=dispatch_skipped)
     
     form = TestForm(obj=test)
     if request.method == "GET":
@@ -133,8 +135,8 @@ def new_question(test_id):
     return render_template("admin/question_form.html", form=form, test=test)
 
 
-@admin_bp.route('/tests/<int:test_id>/dispatch', methods=['GET', 'POST'])
-@roles_required('admin')
+@admin_bp.route("/tests/<int:test_id>/dispatch", methods=["GET", "POST"])
+@roles_required("admin")
 def dispatch_test(test_id):
     test = Test.query.get_or_404(test_id)
 
@@ -145,7 +147,7 @@ def dispatch_test(test_id):
     if not test.questions:
         flash("Add at least one question before dispatching this test.", "error")
         return redirect(url_for("admin.edit_test", test_id=test.id))
-    
+
     form = DispatchForm()
 
     if form.validate_on_submit():
@@ -154,20 +156,24 @@ def dispatch_test(test_id):
         except CSVParseError as e:
             flash(str(e), "error")
             return render_template("admin/dispatch_form.html", form=form, test=test)
-        
+
         results = dispatch_test_to_emails(test, emails)
+
         test.published_at = test.published_at or db.func.now()
         test.is_locked = True
         db.session.commit()
 
         flash(
-            f"Dispatched to {len(results[0]['dispatched'])} candidate(s). "
-            f"{len(results[0]['skipped'])} skipped.",
+            f"Dispatched to {len(results['dispatched'])} candidate(s). "
+            f"{len(results['skipped'])} skipped.",
             "success",
         )
 
+        if results["skipped"]:
+            session["dispatch_skipped"] = results["skipped"]
+
         return redirect(url_for("admin.edit_test", test_id=test.id))
-    
+
     return render_template("admin/dispatch_form.html", form=form, test=test)
 
         

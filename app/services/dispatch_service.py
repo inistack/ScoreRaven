@@ -41,19 +41,17 @@ def dispatch_test_to_email(test, email):
 
 
 def dispatch_test_to_emails(test, emails):
-    results = [{"dispatched": [], "skipped": []}]
+    results = {"dispatched": [], "skipped": []}
 
-    for email in emails:
-        email = email.strip().lower()
+    for raw_email in emails:
+        email = raw_email.strip()
         if not email:
             continue
-
         try:
-            dispatch = dispatch_test_to_email(test, email)
-            # results['dispatched'].append(email)
-            results[0]["dispatched"].append(email)
+            dispatch_test_to_email(test, email)
+            results["dispatched"].append(email)
         except Exception as e:
-            results[0]["skipped"].append(email)
+            results["skipped"].append({"email": email, "reason": str(e)})
 
     return results
 

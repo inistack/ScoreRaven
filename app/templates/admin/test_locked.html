@@ -37,6 +37,17 @@
 </form>
 {% endif %}
 
+{% if dispatch_skipped %}
+    <div class="alert alert-warning">
+        <strong>{{ dispatch_skipped|length }} email(s) could not be dispatched:</strong>
+        <ul class="mb-0 mt-2">
+            {% for item in dispatch_skipped %}
+                <li>{{ item.email }} — <span class="text-muted">{{ item.reason }}</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 <h4 class="mt-4">Dispatches</h4>
 <div class="table-responsive-wrap">
     <table class="table">
