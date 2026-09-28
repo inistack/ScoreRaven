@@ -12,6 +12,8 @@ from app.services.csv_parsing import extract_emails_from_csv, CSVParseError
 from app.services.test_lock import ensure_test_unlocked
 from app.services.results_service import release_results, release_results_for_test
 import random
+from app.services.test_service import duplicate_test
+
 
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -296,3 +298,19 @@ def preview_test(test_id):
 
     return render_template("admin/preview_test.html", test=test, questions=questions)
 
+
+@admin_bp.route("/tests/<int:test_id>/duplicate", methods=["POST"])
+@roles_required("admin")
+def duplicate_test_route(test_id):
+    source = Test.query.get_or_404(test_id)
+    copy, reset_schedule = duplicate_test(source, current_user.id)
+
+    if reset_schedule:
+        flash(
+            "Test duplicated. Release mode was reset to manual, so set a new schedule if you want one.",
+            "info",
+        )
+    else:
+        flash("Test duplicated. You're now editing the copy.", "success")
+
+    return redirect(url_for("admin.edit_test", test_id=copy.id))

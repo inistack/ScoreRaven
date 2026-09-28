@@ -107,7 +107,7 @@
 {% else %}
 <p class="text-muted">No questions yet.</p>
 {% endif %}
-<div class="d-flex gap-2 mt-3">
+<div class="d-flex gap-3 flex-wrap">
     <a href="{{ url_for('admin.new_question', test_id=test.id) }}" class="btn btn-outline-primary">
         Add Question
     </a>
@@ -126,6 +126,9 @@
         onsubmit="return confirm('Delete this entire test and all its questions? This cannot be undone.');"
         class="d-inline">
         <button type="submit" class="btn btn-outline-danger">Delete Test</button>
+    </form>
+    <form method="POST" action="{{ url_for('admin.duplicate_test_route', test_id=test.id) }}" class="d-inline">
+        <button type="submit" class="btn btn-outline-secondary">Duplicate</button>
     </form>
 </div>
 

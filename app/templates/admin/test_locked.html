@@ -4,6 +4,9 @@
 {% block content %}
 <h2 class="font-serif mb-2" style="font-size: 1.85rem;">{{ test.title }}</h2>
 <p class="text-muted">{{ test.difficulty }} · {{ test.questions|length }} question(s)</p>
+<form method="POST" action="{{ url_for('admin.duplicate_test_route', test_id=test.id) }}" class="d-inline">
+    <button type="submit" class="btn btn-outline-primary mb-3">Duplicate as New Draft</button>
+</form>
 
 <div class="alert alert-secondary">
     This test has been dispatched and can no longer be edited.
