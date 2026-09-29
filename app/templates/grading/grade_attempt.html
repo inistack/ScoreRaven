@@ -6,6 +6,13 @@
 <h2 class="font-serif mb-2" style="font-size: 1.85rem;">Grading: {{ attempt.dispatch.test.title }}</h2>
 <p class="text-muted mb-4">Candidate #{{ attempt.dispatch.candidate_id }}</p>
 
+{% if regrade %}
+    <div class="alert alert-warning">
+        Regrading a completed attempt. Changes are logged and will update the candidate's score.
+        <a href="{{ url_for('grading.grade_history', attempt_id=attempt.id) }}">View history</a>
+    </div>
+{% endif %}
+
 <form method="POST">
     {% for answer in answers %}
     {% set question = answer.question %}
@@ -46,6 +53,6 @@
     </div>
     {% endfor %}
 
-    <button type="submit" class="btn btn-primary">Save Grades</button>
+    <button type="submit" class="btn btn-primary">{{ "Save Regrade" if regrade else "Save Grades" }}</button>
 </form>
 {% endblock %}

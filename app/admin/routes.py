@@ -10,9 +10,10 @@ from app.services.subject_service import get_or_create_subject
 from app.services.dispatch_service import dispatch_test_to_emails
 from app.services.csv_parsing import extract_emails_from_csv, CSVParseError
 from app.services.test_lock import ensure_test_unlocked
-from app.services.results_service import release_results, release_results_for_test
+from app.services.results_service import release_results, release_results_for_test, get_test_results_summary
 import random
 from app.services.test_service import duplicate_test
+from datetime import timezone
 
 
 
@@ -39,8 +40,9 @@ def new_test():
             validity_hours=form.validity_hours.data,
             created_by=current_user.id,
             scheduled_release_at=(
-            form.scheduled_release_at.data if form.release_mode.data == "scheduled" else None),
-        )
+                form.scheduled_release_at.data.replace(tzinfo=timezone.utc)
+                if form.release_mode.data == "scheduled" and form.scheduled_release_at.data  else None),
+            )
         db.session.add(test)
         db.session.commit()
         flash("Test created. Add questions before publishing.", "success")
@@ -80,7 +82,9 @@ def edit_test(test_id):
         )
         test.time_limit_seconds = form.time_limit_minutes.data * 60
         test.validity_hours = form.validity_hours.data
-        test.scheduled_release_at = (form.scheduled_release_at.data if form.release_mode.data == "scheduled" else None)
+        test.scheduled_release_at = (
+            form.scheduled_release_at.data.replace(tzinfo=timezone.utc)
+            if form.release_mode.data == "scheduled" and form.scheduled_release_at.data else None) 
         db.session.commit()
         flash("Test updated.", "success")
         return redirect(url_for("admin.edit_test", test_id=test.id))
@@ -204,6 +208,17 @@ def release_all_results(test_id):
     return redirect(url_for("admin.edit_test", test_id=test_id))
 
 
+@admin_bp.route("/tests/<int:test_id>/results")
+@roles_required("admin")
+def test_results(test_id):
+    test = Test.query.get_or_404(test_id)
+    summary = get_test_results_summary(test)
+    dispatches = sorted(test.dispatches, key=lambda d: d.invited_at, reverse=True)
+    return render_template(
+        "admin/test_results.html", test=test, summary=summary, dispatches=dispatches
+    )
+
+
 @admin_bp.route("/tests/<int:test_id>/questions/<int:question_id>/edit", methods=["GET", "POST"])
 @roles_required("admin")
 def edit_question(test_id, question_id):
@@ -265,7 +280,7 @@ def delete_test(test_id):
     db.session.delete(test)
     db.session.commit()
     flash("Test deleted.", "success")
-    return redirect(url_for("admin.dashboard"))
+    return redirect(url_for("dashboard.index"))
 
 
 @admin_bp.route('/tests/<int:test_id>/questions/<int:question_id>/delete', methods=['POST'])

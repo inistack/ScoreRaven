@@ -37,7 +37,18 @@ def queue():
         .all()
     )
 
-    return render_template('grading/queue.html', unclaimed=unclaimed, my_claims=my_claims)
+    recently_graded = (
+        Attempt.query
+        .filter(Attempt.status == "graded")
+        .order_by(Attempt.submitted_at.desc())
+        .limit(20)
+        .all()
+    )
+
+    return render_template(
+        'grading/queue.html',
+        unclaimed=unclaimed, my_claims=my_claims, recently_graded=recently_graded,
+    )
 
 
 @grading_bp.route("/attempts/<int:attempt_id>/claim", methods=["POST"])
@@ -80,6 +91,27 @@ def grade_attempt(attempt_id):
     answers = sorted(attempt.answers, key=lambda a: a.question_id)
 
     return render_template("grading/grade_attempt.html", attempt=attempt, answers=answers)   
+
+
+@grading_bp.route("/attempts/<int:attempt_id>/regrade", methods=["GET", "POST"])
+@roles_required("admin", "grader")
+def regrade_attempt(attempt_id):
+    attempt = Attempt.query.get_or_404(attempt_id)
+
+    has_written = any(a.question.type == "written" for a in attempt.answers)
+    if attempt.status not in ("graded", "completed") or not has_written:
+        flash("This attempt is not available for regrading.", "error")
+        return redirect(url_for("grading.queue"))
+
+    if request.method == "POST":
+        apply_grades(attempt, request.form, current_user.id)
+        flash("Regrade saved.", "success")
+        return redirect(url_for("grading.queue"))
+
+    answers = sorted(attempt.answers, key=lambda a: a.question_id)
+    return render_template(
+        "grading/grade_attempt.html", attempt=attempt, answers=answers, regrade=True
+    )
 
 
 @grading_bp.route("/attempts/<int:attempt_id>/history")

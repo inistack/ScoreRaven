@@ -73,3 +73,26 @@ def release_due_scheduled_tests():
     ).all()
 
     return sum(release_results_for_test(test) for test in due_tests)
+
+
+def get_test_results_summary(test):
+    dispatches = test.dispatches
+
+    scored = [d.attempt.score for d in dispatches if d.attempt and d.attempt.score is not None]
+    completed = sum(1 for d in dispatches if d.attempt and d.attempt.status in ("graded", "completed"))
+    pending_grading = sum(1 for d in dispatches if d.attempt and d.attempt.status == "pending_grading")
+    in_progress = sum(1 for d in dispatches if d.attempt and d.attempt.status == "in_progress")
+    no_show = sum(1 for d in dispatches if d.status == "expired_no_attempt")
+    released = sum(1 for d in dispatches if d.results_released_at is not None)
+    total_points = sum(q.points for q in test.questions)
+
+    return {
+        "total_dispatched": len(dispatches),
+        "completed": completed,
+        "pending_grading": pending_grading,
+        "in_progress": in_progress,
+        "no_show": no_show,
+        "released": released,
+        "total_points": total_points,
+        "average_score": round(sum(scored) / len(scored), 1) if scored else None,
+    }

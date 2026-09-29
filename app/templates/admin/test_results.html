@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ test.title }} — ScoreRaven{% endblock %}
+
+{% block content %}
+<h2 class="font-serif mb-2" style="font-size: 1.85rem;">{{ test.title }} — Results</h2>
+<p class="text-muted mb-4">
+    {{ test.subject.name }} &middot; {{ test.difficulty }} &middot; {{ summary.total_points }} point(s) possible
+</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+        <div class="card text-center"><div class="card-body">
+            <h4 class="mb-0">{{ summary.total_dispatched }}</h4><small class="text-muted">Dispatched</small>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center"><div class="card-body">
+            <h4 class="mb-0">{{ summary.completed }}</h4><small class="text-muted">Completed</small>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center"><div class="card-body">
+            <h4 class="mb-0">{{ summary.pending_grading }}</h4><small class="text-muted">Pending Grading</small>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center"><div class="card-body">
+            <h4 class="mb-0">{{ summary.no_show }}</h4><small class="text-muted">No-show</small>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center"><div class="card-body">
+            <h4 class="mb-0">{{ summary.released }}</h4><small class="text-muted">Released</small>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center"><div class="card-body">
+            <h4 class="mb-0">{{ summary.average_score if summary.average_score is not none else "—" }}</h4>
+            <small class="text-muted">Avg Score{% if summary.average_score is not none %} / {{ summary.total_points }}{% endif %}</small>
+        </div></div>
+    </div>
+</div>
+
+{% if test.release_mode != "immediate" %}
+    <form method="POST" action="{{ url_for('admin.release_all_results', test_id=test.id) }}" class="mb-4">
+        <button type="submit" class="btn btn-success">Release All Results</button>
+    </form>
+{% endif %}
+
+{% if dispatches %}
+    <div class="table-responsive-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Candidate</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in dispatches %}
+                    <tr>
+                        <td>#{{ d.candidate_id }}</td>
+                        <td>{{ d.attempt.status if d.attempt else d.status }}</td>
+                        <td>{{ d.attempt.score if d.attempt and d.attempt.score is not none else "—" }}</td>
+                        <td class="gap-2 align-items-center">
+                            {% if d.attempt and d.attempt.status in ("graded", "completed") and not d.results_released_at and test.release_mode != "immediate" %}
+                                <form method="POST" action="{{ url_for('admin.release_dispatch_results', test_id=test.id, dispatch_id=d.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-success">Release</button>
+                                </form>
+                            {% elif d.results_released_at %}
+                                <span class="badge bg-success">Released</span>
+                            {% endif %}
+
+                            {% if d.attempt and d.attempt.status == "graded" %}
+                                <a href="{{ url_for('grading.regrade_attempt', attempt_id=d.attempt.id) }}" class="btn btn-sm btn-outline-warning">
+                                    Regrade
+                                </a>
+                                <a href="{{ url_for('grading.grade_history', attempt_id=d.attempt.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    History
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="text-muted">No candidates have been dispatched yet.</p>
+{% endif %}
+
+<a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="d-block mt-3">Back to test</a>
+{% endblock %}
