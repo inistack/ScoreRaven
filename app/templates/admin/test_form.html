@@ -4,9 +4,11 @@
 
 {% block content %}
 <h2 class="font-serif mb-4" style="font-size: 1.85rem;">{{ "Edit" if test else "New" }} Test</h2>
+{% if test %}
 <a href="{{ url_for('admin.preview_test', test_id=test.id) }}" class="btn btn-outline-secondary mb-3">
     Preview as Candidate
 </a>
+{% endif %}
 <form method="POST">
     {{ form.hidden_tag() }}
 

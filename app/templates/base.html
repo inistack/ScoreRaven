@@ -52,7 +52,7 @@
         </div>
     </nav>
 
-    <main>
+    <main style="min-height: 85dvh;">
         {% block page %}
             <div class="{% block container_class %}container-app{% endblock %}">
                 {% with messages = get_flashed_messages(with_categories=true) %}

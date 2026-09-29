@@ -222,8 +222,7 @@ a { text-decoration: none; }
 
 .sr-footer {
   border-top: 1px solid var(--sr-border);
-  padding: 2.5rem 1.5rem;
-  margin-top: 4rem;
+  padding: 1.5rem 1.5rem;
 }
 
 .sr-footer-inner {
