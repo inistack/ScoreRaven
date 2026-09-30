@@ -22,10 +22,10 @@ def init_celery(app):
         "schedule": 900.0,  # every 15 minutes
     },
     "release-scheduled-results": {
-    "task": "app.tasks.release_scheduled_results",
+    "task": "app.tasks.release_due_scheduled_tests_task",
     "schedule": 300.0,  # every 5 minutes
-},
-}
+    },
+    }
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
