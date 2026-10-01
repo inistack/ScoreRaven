@@ -93,7 +93,3 @@ migrations/      # Alembic migrations
 ```bash
 flask create-user --email <email> --name <name> --role <admin|grader>
 ```
-
-## License
-
-Proprietary — all rights reserved.
