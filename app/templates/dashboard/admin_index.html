@@ -28,9 +28,9 @@
     <a href="{{ url_for('grading.all_history') }}" class="btn btn-outline-secondary">Grade History</a>
 </div>
 
-<h5>Recent Tests</h5>
+<h5>All Tests</h5>
 <ul class="list-group mb-3">
-    {% for t in recent_tests %}
+    {% for t in tests_pagination.items %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <a href="{{ url_for('admin.edit_test', test_id=t.id) }}">{{ t.title }}</a>
             <span class="d-flex align-items-center gap-2">
@@ -46,5 +46,25 @@
         <li class="list-group-item text-muted">No tests yet.</li>
     {% endfor %}
 </ul>
+
+{% if tests_pagination.pages > 1 %}
+    <nav>
+        <ul class="pagination">
+            <li class="page-item {{ 'disabled' if not tests_pagination.has_prev }}">
+                <a class="page-link" href="{{ url_for('dashboard.index', page=tests_pagination.prev_num) if tests_pagination.has_prev else '#' }}">
+                    Previous
+                </a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ tests_pagination.page }} of {{ tests_pagination.pages }}</span>
+            </li>
+            <li class="page-item {{ 'disabled' if not tests_pagination.has_next }}">
+                <a class="page-link" href="{{ url_for('dashboard.index', page=tests_pagination.next_num) if tests_pagination.has_next else '#' }}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}
 
 {% endblock %}

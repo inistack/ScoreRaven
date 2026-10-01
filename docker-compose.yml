@@ -1,0 +1,71 @@
+x-app: &app
+  build: .
+  image: scoreraven-app
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql://scoreraven:scoreraven@db:5432/scoreraven
+    CELERY_BROKER_URL: redis://redis:6379/0
+    CELERY_RESULT_BACKEND: redis://redis:6379/0
+    APP_BASE_URL: http://localhost:8000
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: scoreraven
+      POSTGRES_PASSWORD: scoreraven   # local dev only
+      POSTGRES_DB: scoreraven
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scoreraven -d scoreraven"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  
+  migrate:
+    <<: *app
+    command: flask db upgrade
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  web:
+    <<: *app
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    
+  worker:
+    <<: *app
+    command: celery -A celery_worker.celery worker --loglevel=info
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+  
+  beat:
+    <<: *app
+    command: celery -A celery_worker.celery beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
