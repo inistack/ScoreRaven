@@ -93,3 +93,8 @@ migrations/      # Alembic migrations
 ```bash
 flask create-user --email <email> --name <name> --role <admin|grader>
 ```
+
+## Project URL
+```
+https://p01--scoreraven-web--ljy2hlhx78ff.code.run/
+```
